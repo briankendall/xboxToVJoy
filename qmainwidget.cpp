@@ -5,16 +5,43 @@
 #include <QMessageBox>
 #include <QDebug>
 #include "qmainwidget.h"
+#include <tlhelp32.h>
+
+int processesWithName(QString name)
+{
+    int count = 0;
+    PROCESSENTRY32 entry;
+    entry.dwSize = sizeof(PROCESSENTRY32);
+
+    HANDLE snapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, NULL);
+
+    if (Process32First(snapshot, &entry) == TRUE) {
+        while (Process32Next(snapshot, &entry) == TRUE) {
+            if (QString::fromWCharArray(entry.szExeFile) == name) {
+                count += 1;
+            }
+        }
+    }
+
+    return count;
+}    
 
 QMainWidget::QMainWidget(QWidget *parent) :
     QWidget(parent)
 {
+    // This is a poor way to check to see if the app is already running, but
+    // quite frankly I'm lazy:
+    if (processesWithName("xboxToVJoy.exe") > 1) {
+        error("There is already an instance of xboxToVJoy running.");
+        return;
+    }
+    
     createTrayIcon();
     
     controllerWindow = NULL;
     
     controllerRemapper = new ControllerRemapper(this);
-    connect(controllerRemapper, SIGNAL(initializationError(QString)), this, SLOT(remapperError(QString)));
+    connect(controllerRemapper, SIGNAL(initializationError(QString)), this, SLOT(error(QString)));
     controllerRemapper->start();
 }
 
@@ -46,7 +73,7 @@ void QMainWidget::quit()
     qApp->quit();
 }
 
-void QMainWidget::remapperError(QString msg)
+void QMainWidget::error(QString msg)
 {
     QMessageBox msgBox;
 	msgBox.setText("xboxToVJoy failed to start");
@@ -72,3 +99,4 @@ void QMainWidget::controllerWindowDestroyed()
 {
     controllerWindow = NULL;
 }
+

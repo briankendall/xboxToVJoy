@@ -15,7 +15,7 @@ signals:
     
 public slots:
     void quit();
-    void remapperError(QString msg);
+    void error(QString msg);
     void showControllerWindow();
     void controllerWindowDestroyed();
     

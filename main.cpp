@@ -3,6 +3,7 @@
 #include <QApplication>
 #include <QDebug>
 #include <windows.h>
+#include <QString>
 
 int main(int argc, char *argv[])
 {
