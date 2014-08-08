@@ -8,8 +8,6 @@
 typedef DWORD (WINAPI* XInputGetStateEx_t)(DWORD dwUserIndex, XINPUT_STATE *pState);
 XInputGetStateEx_t XInputGetStateEx = NULL;
 
-#define XINPUT_GAMEPAD_GUIDE 0x400
-
 const int buttonFlags[kButtonCount] = {XINPUT_GAMEPAD_A, XINPUT_GAMEPAD_B, XINPUT_GAMEPAD_X, XINPUT_GAMEPAD_Y,
                                        XINPUT_GAMEPAD_LEFT_SHOULDER, XINPUT_GAMEPAD_RIGHT_SHOULDER, XINPUT_GAMEPAD_BACK,
                                        XINPUT_GAMEPAD_START, XINPUT_GAMEPAD_LEFT_THUMB, XINPUT_GAMEPAD_RIGHT_THUMB,
@@ -47,6 +45,79 @@ long xboxTriggerToVJoy(BYTE val)
 bool directionPressed(const QVector<bool> &buttons, bool left, bool up, bool right, bool down)
 {
 	return buttons[0] == left && buttons[1] == up && buttons[2] == right && buttons[3] == down;
+}
+
+#define kInteractionWaitTime 100
+
+// Note: the following four functions are only meant to be used from the controller window,
+// especially because they will block
+
+void pressButton(UINT deviceIndex, UINT xboxButton)
+{
+    Sleep(750);
+    UCHAR button = 0;
+    
+    for(UCHAR i = 0; i < kButtonCount; ++i) {
+        if (buttonFlags[i] == xboxButton) {
+            button = i+1;
+            break;
+        }
+    }
+    
+    if (button == 0) {
+        qDebug() << "Error: tried to press invalid button";
+        return;
+    }
+    
+    SetBtn(true, deviceIndex+1, button);
+    Sleep(kInteractionWaitTime);
+    SetBtn(false, deviceIndex+1, button);
+}
+
+void moveJoystick(UINT deviceIndex, bool right, double xVal, double yVal)
+{
+    Sleep(750);
+    UINT xAxis, yAxis;
+    
+    if (right) {
+        xAxis = HID_USAGE_RX;
+        yAxis = HID_USAGE_RY;
+    } else {
+        xAxis = HID_USAGE_X;
+        yAxis = HID_USAGE_Y;
+    }
+    
+    SetAxis(LONG((xVal + 1.0)*16383.5) + 1, deviceIndex+1, xAxis);
+    SetAxis(LONG((yVal + 1.0)*16383.5) + 1, deviceIndex+1, yAxis);
+    
+    Sleep(kInteractionWaitTime);
+    
+    SetAxis(0x4000, deviceIndex+1, xAxis);
+    SetAxis(0x4000, deviceIndex+1, yAxis);
+}
+
+void pressTrigger(UINT deviceIndex, bool right, double val)
+{
+    Sleep(750);
+    UINT axis;
+    
+    if (right) {
+        axis = HID_USAGE_SL1;
+    } else {
+        axis = HID_USAGE_SL0;
+    }
+    
+    SetAxis(LONG(val*32767.0) + 1, deviceIndex+1, axis);
+    Sleep(kInteractionWaitTime);
+    SetAxis(1, deviceIndex+1, axis);
+}
+
+void moveDPad(UINT deviceIndex, int direction)
+{    
+    Sleep(750);
+    SetContPov(direction * 4500, deviceIndex+1, 1);
+    Sleep(kInteractionWaitTime);
+    SetContPov(-1, deviceIndex+1, 1);
 }
 
 void Controller::initialize()

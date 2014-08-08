@@ -419,7 +419,7 @@
      <string>Right stick</string>
     </property>
    </widget>
-   <widget class="QPushButton" name="LClickButton_2">
+   <widget class="QPushButton" name="RClickButton">
     <property name="geometry">
      <rect>
       <x>100</x>
@@ -495,7 +495,7 @@
     </property>
    </widget>
   </widget>
-  <widget class="QPushButton" name="XButton_2">
+  <widget class="QPushButton" name="startButton">
    <property name="geometry">
     <rect>
      <x>250</x>
@@ -508,7 +508,7 @@
     <string>Start</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="XButton_3">
+  <widget class="QPushButton" name="backButton">
    <property name="geometry">
     <rect>
      <x>250</x>
@@ -521,7 +521,7 @@
     <string>Back</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="XButton_4">
+  <widget class="QPushButton" name="rightBumperButton">
    <property name="geometry">
     <rect>
      <x>400</x>
@@ -534,7 +534,7 @@
     <string>Right Bumper</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="XButton_5">
+  <widget class="QPushButton" name="leftBumperButton">
    <property name="geometry">
     <rect>
      <x>80</x>
@@ -547,7 +547,7 @@
     <string>Left Bumper</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="XButton_6">
+  <widget class="QPushButton" name="leftTriggerButton">
    <property name="geometry">
     <rect>
      <x>80</x>
@@ -560,7 +560,7 @@
     <string>Left Trigger</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="XButton_7">
+  <widget class="QPushButton" name="rightTriggerButton">
    <property name="geometry">
     <rect>
      <x>400</x>
@@ -573,7 +573,7 @@
     <string>Right Trigger</string>
    </property>
   </widget>
-  <widget class="QComboBox" name="comboBox">
+  <widget class="QComboBox" name="controllerComboBox">
    <property name="geometry">
     <rect>
      <x>376</x>
@@ -614,6 +614,19 @@
    </property>
    <property name="text">
     <string>Use these buttons to configure an application to use this virtual controller:</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="guideButton">
+   <property name="geometry">
+    <rect>
+     <x>250</x>
+     <y>135</y>
+     <width>71</width>
+     <height>23</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Guide</string>
    </property>
   </widget>
  </widget>

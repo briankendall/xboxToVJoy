@@ -68,6 +68,10 @@ void QMainWidget::createTrayIcon()
 
 void QMainWidget::quit()
 {
+    if (controllerWindow) {
+        controllerWindow->close();
+    }
+    
     controllerRemapper->exit(0);
     controllerRemapper->wait(5000);
     qApp->quit();

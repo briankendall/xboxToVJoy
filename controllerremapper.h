@@ -7,11 +7,24 @@
 #include <QVector>
 #include <QTimer>
 
+#define XINPUT_GAMEPAD_GUIDE 0x400
 #define kButtonCount 11
 // The following is a value that an XInput axis is guaranteed never to have, and
 // is therefore safe to use as a flag indicating an unset value:
 #define kAxisUnset -100000
 #define kPollingCyclesPerSecond 200
+
+enum {
+    kUp = 0,
+    kUpRight,
+    kRight,
+    kDownRight,
+    kDown,
+    kDownLeft,
+    kLeft,
+    kUpLeft,
+    kNoDirection
+};
 
 class Controller {
 public:
@@ -56,5 +69,10 @@ protected:
     QTimer *pollTimer;
     
 };
+
+void pressButton(UINT deviceIndex, UINT xboxButton);
+void moveJoystick(UINT deviceIndex, bool right, double xVal, double yVal);
+void pressTrigger(UINT deviceIndex, bool right, double val);
+void moveDPad(UINT deviceIndex, int direction);
 
 #endif // CONTROLLERREMAPPER_H
