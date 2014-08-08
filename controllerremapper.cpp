@@ -10,6 +10,9 @@ void ControllerRemapper::run()
 {
     qDebug() << "Starting thread";
     
+    emit initializationFailed("Testing one two three");
+    exit(0);
+    
     exec();
     
     qDebug() << "Thread finished";

@@ -14,6 +14,7 @@ signals:
     
 public slots:
     void quit();
+    void remapperError(QString msg);
     
 private:
     void createTrayIcon();

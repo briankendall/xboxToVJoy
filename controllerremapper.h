@@ -11,10 +11,13 @@ public:
     
 signals:
     
+    void initializationFailed(QString msg);
+    
 public slots:
     
 protected:
     virtual void run() Q_DECL_OVERRIDE;
+    void initialize();
 };
 
 #endif // CONTROLLERREMAPPER_H

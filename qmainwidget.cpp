@@ -2,6 +2,8 @@
 #include <QMenu>
 #include <QAction>
 #include <QApplication>
+#include <QMessageBox>
+#include <QDebug>
 #include "qmainwidget.h"
 
 QMainWidget::QMainWidget(QWidget *parent) :
@@ -9,6 +11,7 @@ QMainWidget::QMainWidget(QWidget *parent) :
 {
     createTrayIcon();
     controllerRemapper = new ControllerRemapper(this);
+    connect(controllerRemapper, SIGNAL(initializationFailed(QString)), this, SLOT(remapperError(QString)));
     controllerRemapper->start();
 }
 
@@ -36,4 +39,17 @@ void QMainWidget::createTrayIcon()
 void QMainWidget::quit()
 {
     controllerRemapper->exit(0);
+    controllerRemapper->wait(5000);
+    qApp->quit();
+}
+
+void QMainWidget::remapperError(QString msg)
+{
+    QMessageBox msgBox;
+	msgBox.setText("xboxToVJoy failed to start");
+	msgBox.setInformativeText(msg);
+	msgBox.setIcon(QMessageBox::Critical);
+	msgBox.addButton("Quit", QMessageBox::AcceptRole);
+	msgBox.exec();
+    qApp->quit();
 }
