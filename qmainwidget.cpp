@@ -11,7 +11,7 @@ QMainWidget::QMainWidget(QWidget *parent) :
 {
     createTrayIcon();
     controllerRemapper = new ControllerRemapper(this);
-    connect(controllerRemapper, SIGNAL(initializationFailed(QString)), this, SLOT(remapperError(QString)));
+    connect(controllerRemapper, SIGNAL(initializationError(QString)), this, SLOT(remapperError(QString)));
     controllerRemapper->start();
 }
 

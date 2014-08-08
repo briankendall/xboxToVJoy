@@ -1,7 +1,9 @@
 #ifndef CONTROLLERREMAPPER_H
 #define CONTROLLERREMAPPER_H
 
+#include <windows.h>
 #include <QThread>
+#include <QSet>
 
 class ControllerRemapper : public QThread
 {
@@ -11,13 +13,18 @@ public:
     
 signals:
     
-    void initializationFailed(QString msg);
+    void initializationError(QString msg);
     
 public slots:
     
 protected:
     virtual void run() Q_DECL_OVERRIDE;
     void initialize();
+    void deinitialize();
+    void initializeDevice(UINT deviceId);
+    void throwInitError(QString arg);
+    
+    QSet<UINT> initializedDevices;
 };
 
 #endif // CONTROLLERREMAPPER_H
