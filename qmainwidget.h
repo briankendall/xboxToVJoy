@@ -2,6 +2,7 @@
 #define QMAINWIDGET_H
 
 #include <QWidget>
+#include "controllerremapper.h"
 
 class QMainWidget : public QWidget
 {
@@ -12,9 +13,13 @@ public:
 signals:
     
 public slots:
+    void quit();
     
 private:
     void createTrayIcon();
+    void startControllerMapperThread();
+    
+    ControllerRemapper *controllerRemapper;
 };
 
 #endif // QMAINWIDGET_H

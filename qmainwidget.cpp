@@ -1,13 +1,15 @@
-#include "qmainwidget.h"
 #include <QSystemTrayIcon>
 #include <QMenu>
 #include <QAction>
 #include <QApplication>
+#include "qmainwidget.h"
 
 QMainWidget::QMainWidget(QWidget *parent) :
     QWidget(parent)
 {
     createTrayIcon();
+    controllerRemapper = new ControllerRemapper(this);
+    controllerRemapper->start();
 }
 
 void QMainWidget::createTrayIcon()
@@ -18,7 +20,7 @@ void QMainWidget::createTrayIcon()
     QAction *quitAction = new QAction("Shutdown xboxToVJoy", this);
     
     // connect(windowAction, SIGNAL(triggered()), );
-    QObject::connect(quitAction, SIGNAL(triggered()), qApp, SLOT(quit()));
+    QObject::connect(quitAction, SIGNAL(triggered()), this, SLOT(quit()));
     
     menu->addAction(windowAction);
     menu->addSeparator();
@@ -29,4 +31,9 @@ void QMainWidget::createTrayIcon()
     trayIcon->setIcon(icon);
     
     trayIcon->show();
+}
+
+void QMainWidget::quit()
+{
+    controllerRemapper->exit(0);
 }
