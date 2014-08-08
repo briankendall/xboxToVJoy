@@ -1,11 +1,18 @@
 #include "controllerwindow.h"
+#include "qmainwidget.h"
 #include <QApplication>
 
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
-    ControllerWindow w;
-    w.show();
+    QMainWidget *mainWidget;
+    //ControllerWindow w;
+    //w.show();
 
-    return a.exec();
+    mainWidget = new QMainWidget(NULL);
+
+    int result = a.exec();
+    
+    delete mainWidget;
+    return result;
 }

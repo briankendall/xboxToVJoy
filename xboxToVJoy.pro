@@ -13,7 +13,12 @@ TEMPLATE = app
 
 
 SOURCES += main.cpp \
-    controllerwindow.cpp
+    controllerwindow.cpp \
+    qmainwidget.cpp
 
 HEADERS  += \
-    controllerwindow.h
+    controllerwindow.h \
+    qmainwidget.h
+
+RESOURCES += \
+    resources.qrc
