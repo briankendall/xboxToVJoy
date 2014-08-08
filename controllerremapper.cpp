@@ -15,6 +15,17 @@ ControllerRemapper::ControllerRemapper(QObject *parent) :
 {
 }
 
+bool ControllerRemapper::checkAxisExists(UINT deviceId, UINT axis, QString axisName)
+{
+    if (!GetVJDAxisExist(deviceId, axis)) {
+        throwInitError(QString("vJoy device %1 does not have the following axis: %2\nPlease make sure the first four vJoy devices have "
+                               "this axis before launching.").arg(deviceId).arg(axisName));
+        return false;
+    } else {
+        return true;
+    }
+}
+
 void ControllerRemapper::initializeDevice(UINT deviceId)
 {
     // Get the driver attributes (Vendor ID, Product ID, Version Number)
@@ -37,13 +48,46 @@ void ControllerRemapper::initializeDevice(UINT deviceId)
             throwInitError(QString("vJoy Device %1 is already owned by another feeder\nCannot continue.").arg(deviceId));
             return;
         case VJD_STAT_MISS:
-            throwInitError(QString("vJoy Device %d is not installed or disabled\nCannot continue").arg(deviceId));
+            throwInitError(QString("vJoy Device %1 is not installed or disabled\nCannot continue").arg(deviceId));
             return;
         default:
-            throwInitError(QString("vJoy Device %d general error. Cannot continue.").arg(deviceId));
+            throwInitError(QString("vJoy Device %1 general error. Cannot continue.").arg(deviceId));
             return;
     }
-
+    
+    if (!checkAxisExists(deviceId, HID_USAGE_X, "X")) {
+        return;
+    }
+    if (!checkAxisExists(deviceId, HID_USAGE_Y, "Y")) {
+        return;
+    }
+    if (!checkAxisExists(deviceId, HID_USAGE_RX, "RX")) {
+        return;
+    }
+    if (!checkAxisExists(deviceId, HID_USAGE_RY, "RY")) {
+        return;
+    }
+    if (!checkAxisExists(deviceId, HID_USAGE_SL0, "U/Slider")) {
+        return;
+    }
+    if (!checkAxisExists(deviceId, HID_USAGE_SL1, "V/Dial")) {
+        return;
+    }
+    
+	// Get the number of buttons and POV Hat switchessupported by this vJoy device
+    
+    if (GetVJDButtonNumber(deviceId) < 11) {
+        throwInitError(QString("vJoy Device %1 does not have at least 11 buttons.\nPlease make sure "
+                               "the first four vJoy devices all have 11 buttons or more before launching.").arg(deviceId));
+        return;
+    }
+    
+    if (GetVJDContPovNumber(deviceId) < 1) {
+        throwInitError(QString("vJoy Device %1 does not have at least one continuous POV hat switch.\nPlease make sure "
+                               "the first four vJoy devices all have one or more continuous POV hat switches before launching.").arg(deviceId));
+        return;
+    }
+    
     // Acquire the target
     if ((status == VJD_STAT_OWN) || ((status == VJD_STAT_FREE) && (!AcquireVJD(deviceId)))) {
         throwInitError(QString("Failed to acquire vJoy device number %d.").arg(deviceId));

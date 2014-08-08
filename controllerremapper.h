@@ -23,6 +23,7 @@ protected:
     void deinitialize();
     void initializeDevice(UINT deviceId);
     void throwInitError(QString arg);
+    bool checkAxisExists(UINT deviceId, UINT axis, QString axisName);
     
     QSet<UINT> initializedDevices;
 };
