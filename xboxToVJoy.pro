@@ -22,14 +22,17 @@ contains(QMAKE_HOST.arch, x86_64) {
 LIBS += -lvJoyInterface
 
 SOURCES += main.cpp \
-    controllerwindow.cpp \
     qmainwidget.cpp \
-    controllerremapper.cpp
+    controllerremapper.cpp \
+    controllerwindow.cpp
 
 HEADERS  += \
-    controllerwindow.h \
     qmainwidget.h \
-    controllerremapper.h
+    controllerremapper.h \
+    controllerwindow.h
 
 RESOURCES += \
     resources.qrc
+
+FORMS += \
+    controllerwindow.ui

@@ -1,15 +1,22 @@
 #ifndef CONTROLLERWINDOW_H
 #define CONTROLLERWINDOW_H
 
-#include <QMainWindow>
+#include <QDialog>
 
-class ControllerWindow : public QMainWindow
+namespace Ui {
+class ControllerWindow;
+}
+
+class ControllerWindow : public QDialog
 {
     Q_OBJECT
-
+    
 public:
-    ControllerWindow(QWidget *parent = 0);
+    explicit ControllerWindow(QWidget *parent = 0);
     ~ControllerWindow();
+    
+private:
+    Ui::ControllerWindow *ui;
 };
 
-#endif
+#endif // CONTROLLERWINDOW_H
