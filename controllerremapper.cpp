@@ -320,6 +320,8 @@ void ControllerRemapper::run()
     
     initialize();
     
+    setPriority(QThread::HighestPriority);
+    
     pollTimer = new QTimer();
     pollTimer->moveToThread(this);
     connect(pollTimer, SIGNAL(timeout()), this, SLOT(poll()), Qt::DirectConnection);
