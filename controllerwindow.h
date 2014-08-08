@@ -15,6 +15,9 @@ public:
     explicit ControllerWindow(QWidget *parent = 0);
     ~ControllerWindow();
     
+private slots:
+    void on_closeButton_clicked();
+    
 private:
     Ui::ControllerWindow *ui;
 };

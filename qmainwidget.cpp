@@ -10,6 +10,9 @@ QMainWidget::QMainWidget(QWidget *parent) :
     QWidget(parent)
 {
     createTrayIcon();
+    
+    controllerWindow = NULL;
+    
     controllerRemapper = new ControllerRemapper(this);
     connect(controllerRemapper, SIGNAL(initializationError(QString)), this, SLOT(remapperError(QString)));
     controllerRemapper->start();
@@ -22,8 +25,8 @@ void QMainWidget::createTrayIcon()
     QAction *windowAction = new QAction("Controller Window", this);
     QAction *quitAction = new QAction("Shutdown xboxToVJoy", this);
     
-    // connect(windowAction, SIGNAL(triggered()), );
-    QObject::connect(quitAction, SIGNAL(triggered()), this, SLOT(quit()));
+    connect(windowAction, SIGNAL(triggered()), this, SLOT(showControllerWindow()));
+    connect(quitAction, SIGNAL(triggered()), this, SLOT(quit()));
     
     menu->addAction(windowAction);
     menu->addSeparator();
@@ -52,4 +55,20 @@ void QMainWidget::remapperError(QString msg)
 	msgBox.addButton("Quit", QMessageBox::AcceptRole);
 	msgBox.exec();
     qApp->quit();
+}
+
+void QMainWidget::showControllerWindow()
+{
+    if (!controllerWindow) {
+        controllerWindow = new ControllerWindow(this);
+        connect(controllerWindow, SIGNAL(destroyed()), this, SLOT(controllerWindowDestroyed()));
+    }
+    
+    controllerWindow->show();
+    controllerWindow->raise();
+}
+
+void QMainWidget::controllerWindowDestroyed()
+{
+    controllerWindow = NULL;
 }

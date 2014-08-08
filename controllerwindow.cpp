@@ -6,9 +6,16 @@ ControllerWindow::ControllerWindow(QWidget *parent) :
     ui(new Ui::ControllerWindow)
 {
     ui->setupUi(this);
+    setAttribute(Qt::WA_DeleteOnClose, true);
 }
 
 ControllerWindow::~ControllerWindow()
 {
     delete ui;
+}
+
+
+void ControllerWindow::on_closeButton_clicked()
+{
+    done(0);
 }

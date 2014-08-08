@@ -7,17 +7,17 @@
     <x>0</x>
     <y>0</y>
     <width>570</width>
-    <height>420</height>
+    <height>446</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Dialog</string>
+   <string>xboxToVJoy Controller Window</string>
   </property>
   <widget class="QPushButton" name="closeButton">
    <property name="geometry">
     <rect>
      <x>488</x>
-     <y>389</y>
+     <y>415</y>
      <width>75</width>
      <height>23</height>
     </rect>
@@ -30,7 +30,7 @@
    <property name="geometry">
     <rect>
      <x>10</x>
-     <y>237</y>
+     <y>263</y>
      <width>234</width>
      <height>145</height>
     </rect>
@@ -157,7 +157,7 @@
    <property name="geometry">
     <rect>
      <x>10</x>
-     <y>79</y>
+     <y>105</y>
      <width>232</width>
      <height>144</height>
     </rect>
@@ -297,7 +297,7 @@
    <property name="geometry">
     <rect>
      <x>329</x>
-     <y>239</y>
+     <y>265</y>
      <width>232</width>
      <height>144</height>
     </rect>
@@ -437,7 +437,7 @@
    <property name="geometry">
     <rect>
      <x>359</x>
-     <y>108</y>
+     <y>124</y>
      <width>171</width>
      <height>105</height>
     </rect>
@@ -499,7 +499,7 @@
    <property name="geometry">
     <rect>
      <x>250</x>
-     <y>199</y>
+     <y>225</y>
      <width>71</width>
      <height>23</height>
     </rect>
@@ -512,7 +512,7 @@
    <property name="geometry">
     <rect>
      <x>250</x>
-     <y>239</y>
+     <y>265</y>
      <width>71</width>
      <height>23</height>
     </rect>
@@ -525,7 +525,7 @@
    <property name="geometry">
     <rect>
      <x>400</x>
-     <y>39</y>
+     <y>65</y>
      <width>91</width>
      <height>23</height>
     </rect>
@@ -538,7 +538,7 @@
    <property name="geometry">
     <rect>
      <x>80</x>
-     <y>39</y>
+     <y>65</y>
      <width>91</width>
      <height>23</height>
     </rect>
@@ -551,7 +551,7 @@
    <property name="geometry">
     <rect>
      <x>80</x>
-     <y>9</y>
+     <y>35</y>
      <width>91</width>
      <height>23</height>
     </rect>
@@ -564,13 +564,56 @@
    <property name="geometry">
     <rect>
      <x>400</x>
-     <y>9</y>
+     <y>35</y>
      <width>91</width>
      <height>23</height>
     </rect>
    </property>
    <property name="text">
     <string>Right Trigger</string>
+   </property>
+  </widget>
+  <widget class="QComboBox" name="comboBox">
+   <property name="geometry">
+    <rect>
+     <x>376</x>
+     <y>4</y>
+     <width>81</width>
+     <height>22</height>
+    </rect>
+   </property>
+   <item>
+    <property name="text">
+     <string>Controller 1</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>Controller 2</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>Controller 3</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>Controller 4</string>
+    </property>
+   </item>
+  </widget>
+  <widget class="QLabel" name="label_4">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>6</y>
+     <width>361</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Use these buttons to configure an application to use this virtual controller:</string>
    </property>
   </widget>
  </widget>

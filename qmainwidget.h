@@ -3,6 +3,7 @@
 
 #include <QWidget>
 #include "controllerremapper.h"
+#include "controllerwindow.h"
 
 class QMainWidget : public QWidget
 {
@@ -15,12 +16,15 @@ signals:
 public slots:
     void quit();
     void remapperError(QString msg);
+    void showControllerWindow();
+    void controllerWindowDestroyed();
     
 private:
     void createTrayIcon();
     void startControllerMapperThread();
     
     ControllerRemapper *controllerRemapper;
+    ControllerWindow *controllerWindow;
 };
 
 #endif // QMAINWIDGET_H

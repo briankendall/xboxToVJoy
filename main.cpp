@@ -13,7 +13,9 @@ int main(int argc, char *argv[])
 
     if (!SetPriorityClass(GetCurrentProcess(), HIGH_PRIORITY_CLASS)) {
         qWarning() << "Warning: failed to set process priority. Error:" << GetLastError();
-    } 
+    }
+    
+    qApp->setQuitOnLastWindowClosed(false);    
     
     mainWidget = new QMainWidget(NULL);
 
