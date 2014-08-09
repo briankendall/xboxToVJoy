@@ -47,14 +47,13 @@ bool directionPressed(const QVector<bool> &buttons, bool left, bool up, bool rig
 	return buttons[0] == left && buttons[1] == up && buttons[2] == right && buttons[3] == down;
 }
 
-#define kInteractionWaitTime 100
+#define kInteractionWaitTime 250
 
 // Note: the following four functions are only meant to be used from the controller window,
 // especially because they will block
 
 void pressButton(UINT deviceIndex, UINT xboxButton)
 {
-    Sleep(750);
     UCHAR button = 0;
     
     for(UCHAR i = 0; i < kButtonCount; ++i) {
@@ -76,7 +75,6 @@ void pressButton(UINT deviceIndex, UINT xboxButton)
 
 void moveJoystick(UINT deviceIndex, bool right, double xVal, double yVal)
 {
-    Sleep(750);
     UINT xAxis, yAxis;
     
     if (right) {
@@ -98,7 +96,6 @@ void moveJoystick(UINT deviceIndex, bool right, double xVal, double yVal)
 
 void pressTrigger(UINT deviceIndex, bool right, double val)
 {
-    Sleep(750);
     UINT axis;
     
     if (right) {
@@ -114,7 +111,6 @@ void pressTrigger(UINT deviceIndex, bool right, double val)
 
 void moveDPad(UINT deviceIndex, int direction)
 {    
-    Sleep(750);
     SetContPov(direction * 4500, deviceIndex+1, 1);
     Sleep(kInteractionWaitTime);
     SetContPov(-1, deviceIndex+1, 1);
@@ -147,8 +143,11 @@ void Controller::doControllerMap()
         if (lastConnected) {
             reset();
         }
-        lastConnected = connected;
+        lastConnected = false;
+        
         return;
+    } else {
+        lastConnected = true;
     }
     
     if (lastPacketNumber == controllerState.dwPacketNumber && handledFirstPacket) {

@@ -1,6 +1,7 @@
 #include <QDebug>
 #include <windows.h>
 #include <Xinput.h>
+#include <qt_windows.h>
 #include "controllerwindow.h"
 #include "controllerremapper.h"
 #include "ui_controllerwindow.h"
@@ -11,6 +12,12 @@ ControllerWindow::ControllerWindow(QWidget *parent) :
 {
     ui->setupUi(this);
     setAttribute(Qt::WA_DeleteOnClose, true);
+    
+    setAttribute(Qt::WA_ShowWithoutActivating);
+    
+    HWND id = (HWND)winId();
+    SetWindowLong(id, GWL_EXSTYLE, GetWindowLong(id, GWL_EXSTYLE) | WS_EX_NOACTIVATE | WS_EX_TOPMOST);
+    
     currentDeviceIndex = 0;
     ui->controllerComboBox->setCurrentIndex(currentDeviceIndex);
     setFixedSize(size());
