@@ -39,7 +39,7 @@ long xboxAxisToVJoy(SHORT val, bool reverse)
 
 long xboxTriggerToVJoy(BYTE val)
 {
-    return long((double(val) / 255.0) * 32767.0) + 1;
+    return long((double(val) / 255.0) * 16383) + 16384;
 }
 
 bool directionPressed(const QVector<bool> &buttons, bool left, bool up, bool right, bool down)
@@ -106,7 +106,7 @@ void pressTrigger(UINT deviceIndex, bool right, double val)
     
     SetAxis(LONG(val*32767.0) + 1, deviceIndex+1, axis);
     Sleep(kInteractionWaitTime);
-    SetAxis(1, deviceIndex+1, axis);
+    SetAxis(16384, deviceIndex+1, axis);
 }
 
 void moveDPad(UINT deviceIndex, int direction)
@@ -244,12 +244,12 @@ void Controller::reset()
     
     ResetVJD(deviceId);
     SetContPov(-1, deviceId, 1);
-    SetAxis(1, deviceId, HID_USAGE_SL0);
-    SetAxis(1, deviceId, HID_USAGE_SL1);
-    SetAxis(0x4000, deviceId, HID_USAGE_X);
-    SetAxis(0x4000, deviceId, HID_USAGE_Y);
-    SetAxis(0x4000, deviceId, HID_USAGE_RY);
-    SetAxis(0x4000, deviceId, HID_USAGE_RX);
+    SetAxis(xboxTriggerToVJoy(0), deviceId, HID_USAGE_SL0);
+    SetAxis(xboxTriggerToVJoy(0), deviceId, HID_USAGE_SL1);
+    SetAxis(xboxAxisToVJoy(0, false), deviceId, HID_USAGE_X);
+    SetAxis(xboxAxisToVJoy(0, true), deviceId, HID_USAGE_Y);
+    SetAxis(xboxAxisToVJoy(0, false), deviceId, HID_USAGE_RX);
+    SetAxis(xboxAxisToVJoy(0, true), deviceId, HID_USAGE_RY);
 }
 
 ControllerRemapper::ControllerRemapper(QObject *parent) :

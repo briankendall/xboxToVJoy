@@ -12,7 +12,7 @@
 // The following is a value that an XInput axis is guaranteed never to have, and
 // is therefore safe to use as a flag indicating an unset value:
 #define kAxisUnset -100000
-#define kPollingCyclesPerSecond 200
+#define kPollingCyclesPerSecond 150
 
 enum {
     kUp = 0,
