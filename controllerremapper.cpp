@@ -350,7 +350,21 @@ void ControllerRemapper::initializeDevice(UINT deviceId)
 
 void ControllerRemapper::initialize()
 {
+    controllerCount = 0;
     for(UINT index = 0; index < 4; ++index) {
+        if (GetVJDStatus(index+1) == VJD_STAT_MISS) {
+            break;
+        } else {
+            controllerCount++;
+        }
+    }
+    
+    if (controllerCount == 0) {
+        throwInitError("There doesn't seem to be any vJoy controllers.");
+        return;
+    }
+    
+    for(UINT index = 0; index < controllerCount; ++index) {
         initializeDevice(index+1);
         controllers[index].deviceIndex = index;
         controllers[index].initialize();
@@ -379,7 +393,7 @@ void ControllerRemapper::deinitialize()
 
 void ControllerRemapper::poll()
 {
-    for(UINT index = 0; index < 4; ++index) {
+    for(UINT index = 0; index < controllerCount; ++index) {
        controllers[index].doControllerMap(); 
     }
 }

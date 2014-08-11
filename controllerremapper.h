@@ -67,7 +67,7 @@ protected:
     QSet<UINT> initializedDevices;
     Controller controllers[4];
     QTimer *pollTimer;
-    
+    unsigned int controllerCount;
 };
 
 void pressButton(UINT deviceIndex, UINT xboxButton);
