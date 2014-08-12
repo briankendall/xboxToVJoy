@@ -133,9 +133,8 @@ void Controller::initialize()
     lastConnected = false;
 }
 
-void Controller::doControllerMap()
+void Controller::doControllerMap(UINT vjoyDeviceId)
 {
-    UINT deviceId = deviceIndex + 1;
     XINPUT_STATE controllerState;
     ZeroMemory(&controllerState, sizeof(XINPUT_STATE));
     DWORD result = XInputGetStateEx(deviceIndex, &controllerState);
@@ -165,10 +164,10 @@ void Controller::doControllerMap()
         bool playerButtonDown = (state.wButtons & buttonFlags[i]) != 0;
 
         if (playerButtonDown && !buttonsDown[i]) {
-            SetBtn(true, deviceId, i+1);
+            SetBtn(true, vjoyDeviceId, i+1);
 
         } else if (!playerButtonDown && buttonsDown[i]) {
-            SetBtn(false, deviceId, i+1);
+            SetBtn(false, vjoyDeviceId, i+1);
 
         }
 
@@ -187,53 +186,53 @@ void Controller::doControllerMap()
 
     if (directionChanged) {
         if (directionPressed(directionDown, true, false, false, false)) {
-            SetContPov(27000, deviceId, 1);
+            SetContPov(27000, vjoyDeviceId, 1);
         } else if (directionPressed(directionDown, true, true, false, false)) {
-            SetContPov(31500, deviceId, 1);
+            SetContPov(31500, vjoyDeviceId, 1);
         } else if (directionPressed(directionDown, false, true, false, false)) {
-            SetContPov(0, deviceId, 1);
+            SetContPov(0, vjoyDeviceId, 1);
         } else if (directionPressed(directionDown, false, true, true, false)) {
-            SetContPov(4500, deviceId, 1);
+            SetContPov(4500, vjoyDeviceId, 1);
         } else if (directionPressed(directionDown, false, false, true, false)) {
-            SetContPov(9000, deviceId, 1);
+            SetContPov(9000, vjoyDeviceId, 1);
         } else if (directionPressed(directionDown, false, false, true, true)) {
-            SetContPov(13500, deviceId, 1);
+            SetContPov(13500, vjoyDeviceId, 1);
         } else if (directionPressed(directionDown, false, false, false, true)) {
-            SetContPov(18000, deviceId, 1);
+            SetContPov(18000, vjoyDeviceId, 1);
         } else if (directionPressed(directionDown, true, false, false, true)) {
-            SetContPov(22500, deviceId, 1);
+            SetContPov(22500, vjoyDeviceId, 1);
         } else {
-            SetContPov(-1, deviceId, 1);
+            SetContPov(-1, vjoyDeviceId, 1);
         }
     }
 
     if (state.bLeftTrigger != lastLeftTrigger) {
-        SetAxis(xboxTriggerToVJoy(state.bLeftTrigger), deviceId, HID_USAGE_SL0);
+        SetAxis(xboxTriggerToVJoy(state.bLeftTrigger), vjoyDeviceId, HID_USAGE_SL0);
         lastLeftTrigger = state.bLeftTrigger;
     }
 
     if (state.bRightTrigger != lastRightTrigger) {
-        SetAxis(xboxTriggerToVJoy(state.bRightTrigger), deviceId, HID_USAGE_SL1);
+        SetAxis(xboxTriggerToVJoy(state.bRightTrigger), vjoyDeviceId, HID_USAGE_SL1);
         lastRightTrigger = state.bRightTrigger;
     }
 
     if (state.sThumbLX != lastLX) {
-        SetAxis(xboxAxisToVJoy(state.sThumbLX, false), deviceId, HID_USAGE_X);
+        SetAxis(xboxAxisToVJoy(state.sThumbLX, false), vjoyDeviceId, HID_USAGE_X);
         lastLX = state.sThumbLX;
     }
 
     if (state.sThumbLY != lastLY) {
-        SetAxis(xboxAxisToVJoy(state.sThumbLY, true), deviceId, HID_USAGE_Y);
+        SetAxis(xboxAxisToVJoy(state.sThumbLY, true), vjoyDeviceId, HID_USAGE_Y);
         lastLY = state.sThumbLY;
     }
 
     if (state.sThumbRX != lastRX) {
-        SetAxis(xboxAxisToVJoy(state.sThumbRX, false), deviceId, HID_USAGE_RX);
+        SetAxis(xboxAxisToVJoy(state.sThumbRX, false), vjoyDeviceId, HID_USAGE_RX);
         lastRX = state.sThumbRX;
     }
     
     if (state.sThumbRY != lastRY) {
-        SetAxis(xboxAxisToVJoy(state.sThumbRY, true), deviceId, HID_USAGE_RY);
+        SetAxis(xboxAxisToVJoy(state.sThumbRY, true), vjoyDeviceId, HID_USAGE_RY);
         lastRY = state.sThumbRY;
     }
 }
@@ -366,9 +365,26 @@ void ControllerRemapper::initialize()
         return;
     }
     
+    for(UINT index = 0; index < controllerCount; ++index) {
+        initializeDevice(index+1);
+        controllers[index].deviceIndex = index;
+        controllers[index].initialize();
+        controllers[index].reset();
+    }
+    
+    // Get access to XInputGetStateEx so we can query the state of the Guide/Home button:
+    if(!XInputGetStateEx) {
+        HINSTANCE hXInput = LoadLibrary(XINPUT_DLL);
+        XInputGetStateEx = (XInputGetStateEx_t) GetProcAddress(hXInput, (LPCSTR) 100);
+        
+        if(!XInputGetStateEx) { // Might help with wrappers compatibility
+            XInputGetStateEx = (XInputGetStateEx_t) GetProcAddress(hXInput, "XInputGetState");
+        }
+    }
+    
     HRESULT winResult;
     int result;
-    doStuff(winResult, result, dinputWindow, controllerCount);
+    determineCorrelation(winResult, result, xboxToVJoyMap, dinputWindow, controllerCount);
     
     if (FAILED(winResult)) {
         _com_error err(winResult);
@@ -387,23 +403,6 @@ void ControllerRemapper::initialize()
         throwInitError("One or more vJoy Devices could not be correlated with their DirectInput counterpart.");
         return;
     }
-    
-    for(UINT index = 0; index < controllerCount; ++index) {
-        initializeDevice(index+1);
-        controllers[index].deviceIndex = index;
-        controllers[index].initialize();
-        controllers[index].reset();
-    }
-    
-    // Get access to XInputGetStateEx so we can query the state of the Guide/Home button:
-    if(!XInputGetStateEx) {
-        HINSTANCE hXInput = LoadLibrary(XINPUT_DLL);
-        XInputGetStateEx = (XInputGetStateEx_t) GetProcAddress(hXInput, (LPCSTR) 100);
-        
-        if(!XInputGetStateEx) { // Might help with wrappers compatibility
-            XInputGetStateEx = (XInputGetStateEx_t) GetProcAddress(hXInput, "XInputGetState");
-        }
-    } 
 }
 
 void ControllerRemapper::deinitialize()
@@ -418,7 +417,7 @@ void ControllerRemapper::deinitialize()
 void ControllerRemapper::poll()
 {
     for(UINT index = 0; index < controllerCount; ++index) {
-       controllers[index].doControllerMap(); 
+        controllers[index].doControllerMap(xboxToVJoyMap[index]); 
     }
 }
 

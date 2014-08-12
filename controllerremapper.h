@@ -6,6 +6,7 @@
 #include <QSet>
 #include <QVector>
 #include <QTimer>
+#include <QMap>
 
 #define XINPUT_GAMEPAD_GUIDE 0x400
 #define kButtonCount 11
@@ -30,7 +31,7 @@ class Controller {
 public:
     Controller() {};
     void initialize();
-    void doControllerMap();
+    void doControllerMap(UINT vjoyDeviceId);
     void reset();
     
     UINT deviceIndex;
@@ -69,6 +70,7 @@ protected:
     QTimer *pollTimer;
     unsigned int controllerCount;
     HWND dinputWindow;
+    QMap<UINT, UINT> xboxToVJoyMap;
 };
 
 void pressButton(UINT deviceIndex, UINT xboxButton);

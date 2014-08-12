@@ -23,7 +23,10 @@
 
 #include <QDebug>
 #include <QList>
+#include <QElapsedTimer>
 #include "dinputcorrelation.h"
+#include "vjoyinterface.h"
+#include "controllerremapper.h"
 #include "qmainwidget.h"
 
 BOOL CALLBACK enumJoysticksCallback(const DIDEVICEINSTANCE *pdidInstance, VOID *userData);
@@ -31,7 +34,7 @@ BOOL CALLBACK enumJoysticksCallback(const DIDEVICEINSTANCE *pdidInstance, VOID *
 LPDIRECTINPUT8 directInput8Interface = nullptr;
 QList<LPDIRECTINPUTDEVICE8> vjoyControllers;
 
-void doStuff(HRESULT &winResult, int &result, HWND dinputWindow, int vjoyControllerCount)
+void determineCorrelation(HRESULT &winResult, int &result, QMap<UINT, UINT> &correlationMap, HWND dinputWindow, int vjoyControllerCount)
 {
     HRESULT enumerationResult = ERROR_SUCCESS;
     winResult = ERROR_SUCCESS;
@@ -39,6 +42,7 @@ void doStuff(HRESULT &winResult, int &result, HWND dinputWindow, int vjoyControl
     
     directInput8Interface = nullptr;
     vjoyControllers.clear();
+    correlationMap.clear();
     
     winResult = DirectInput8Create(GetModuleHandle(nullptr), DIRECTINPUT_VERSION, IID_IDirectInput8, (VOID **)&directInput8Interface, nullptr);
     if (FAILED(winResult)) {
@@ -63,7 +67,7 @@ void doStuff(HRESULT &winResult, int &result, HWND dinputWindow, int vjoyControl
         result = kErrorNotEnoughVJoyDevices;
         goto cleanup;
     }
-    /*
+    
     foreach(LPDIRECTINPUTDEVICE8 controller, vjoyControllers) {
         winResult = controller->SetDataFormat(&c_dfDIJoystick2);
         if (FAILED(winResult)) {
@@ -76,8 +80,62 @@ void doStuff(HRESULT &winResult, int &result, HWND dinputWindow, int vjoyControl
             qCritical() << "SetCooperativeLevel failed, winResult:" << winResult;
             goto cleanup;
         }
+        
+        winResult = controller->Acquire();
+        if (FAILED(winResult)) {
+            qCritical() << "Acquire failed, winResult:" << winResult;
+            goto cleanup;
+        }
     }
-    */
+    
+    for(int i = 0; i < vjoyControllerCount; ++i) {
+        SetBtn(true, i+1, i+1);
+    }
+    
+    QElapsedTimer timer;
+    timer.start();
+    while(correlationMap.count() < vjoyControllerCount && timer.elapsed() < 2000) {
+        Sleep(20);
+        
+        for(int dinputIndex = 0; dinputIndex < vjoyControllers.count(); ++dinputIndex) {
+            DIJOYSTATE2 state;
+            
+            if (correlationMap.contains(dinputIndex)) {
+                // Already figured out which controller this is, so we can move on...
+                continue;
+            }
+            
+            winResult = vjoyControllers[dinputIndex]->Poll();
+            if (FAILED(winResult)) {
+                qCritical() << "Poll failed, winResult:" << winResult;
+                goto cleanup;
+            }
+            
+            winResult = vjoyControllers[dinputIndex]->GetDeviceState(sizeof(DIJOYSTATE2), &state);
+            if (FAILED(winResult)) {
+                qCritical() << "GetDeviceState failed, winResult:" << winResult;
+                goto cleanup;
+            }
+            
+            for(int i = 0; i < vjoyControllerCount; ++i) {
+                if (state.rgbButtons[i] & 0x80) {
+                    qDebug() << "Matched dinput controller" << dinputIndex << "to vJoy Device #" << i+1;
+                    correlationMap[dinputIndex] = i+1;
+                    break;
+                }
+            }
+        }
+    }
+    
+    for(int i = 0; i < vjoyControllerCount; ++i) {
+        SetBtn(false, i+1, i+1);
+    }
+    
+    if (correlationMap.count() < vjoyControllerCount) {
+        result = kErrorCouldntCorrelate;
+        goto cleanup;
+    }
+    
     // Yes, yes, I've heard people hate on goto's before. But the truth is that we have a function
     // with multiple points where it could return, but at each point it could have any number of
     // objects that need to be cleaned up. Frankly this seems like the best method to deal with
@@ -109,9 +167,8 @@ BOOL CALLBACK enumJoysticksCallback(const DIDEVICEINSTANCE *pdidInstance, VOID *
     
     result = directInput8Interface->CreateDevice(pdidInstance->guidInstance, &controller, nullptr);
     
-    // If it failed, then we can't use this joystick. (Maybe the user unplugged
-    // it while we were in the middle of enumerating it.)
     if (FAILED(result)) {
+        qCritical() << "CreateDevice failed, result:" << result;
         (*enumerationResult) = result;
         return DIENUM_STOP;
     }
