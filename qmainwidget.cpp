@@ -91,7 +91,7 @@ void QMainWidget::error(QString msg)
 void QMainWidget::showControllerWindow()
 {
     if (!controllerWindow) {
-        controllerWindow = new ControllerWindow(this);
+        controllerWindow = new ControllerWindow(controllerRemapper, this);
         connect(controllerWindow, SIGNAL(destroyed()), this, SLOT(controllerWindowDestroyed()));
     }
     

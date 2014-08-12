@@ -50,6 +50,11 @@ class ControllerRemapper : public QThread
 public:
     explicit ControllerRemapper(HWND win, QObject *parent = 0);
     
+    void pressButton(UINT deviceIndex, UINT xboxButton);
+    void moveJoystick(UINT deviceIndex, bool right, double xVal, double yVal);
+    void pressTrigger(UINT deviceIndex, bool right, double val);
+    void moveDPad(UINT deviceIndex, int direction);
+    
 signals:
     
     void initializationError(QString msg);
@@ -72,10 +77,5 @@ protected:
     HWND dinputWindow;
     QMap<UINT, UINT> xboxToVJoyMap;
 };
-
-void pressButton(UINT deviceIndex, UINT xboxButton);
-void moveJoystick(UINT deviceIndex, bool right, double xVal, double yVal);
-void pressTrigger(UINT deviceIndex, bool right, double val);
-void moveDPad(UINT deviceIndex, int direction);
 
 #endif // CONTROLLERREMAPPER_H

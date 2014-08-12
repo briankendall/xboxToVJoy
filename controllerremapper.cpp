@@ -49,74 +49,7 @@ bool directionPressed(const QVector<bool> &buttons, bool left, bool up, bool rig
 	return buttons[0] == left && buttons[1] == up && buttons[2] == right && buttons[3] == down;
 }
 
-#define kInteractionWaitTime 250
-
-// Note: the following four functions are only meant to be used from the controller window,
-// especially because they will block
-
-void pressButton(UINT deviceIndex, UINT xboxButton)
-{
-    UCHAR button = 0;
-    
-    for(UCHAR i = 0; i < kButtonCount; ++i) {
-        if (buttonFlags[i] == xboxButton) {
-            button = i+1;
-            break;
-        }
-    }
-    
-    if (button == 0) {
-        qDebug() << "Error: tried to press invalid button";
-        return;
-    }
-    
-    SetBtn(true, deviceIndex+1, button);
-    Sleep(kInteractionWaitTime);
-    SetBtn(false, deviceIndex+1, button);
-}
-
-void moveJoystick(UINT deviceIndex, bool right, double xVal, double yVal)
-{
-    UINT xAxis, yAxis;
-    
-    if (right) {
-        xAxis = HID_USAGE_RX;
-        yAxis = HID_USAGE_RY;
-    } else {
-        xAxis = HID_USAGE_X;
-        yAxis = HID_USAGE_Y;
-    }
-    
-    SetAxis(LONG((xVal + 1.0)*16383.5) + 1, deviceIndex+1, xAxis);
-    SetAxis(LONG((yVal + 1.0)*16383.5) + 1, deviceIndex+1, yAxis);
-    
-    Sleep(kInteractionWaitTime);
-    
-    SetAxis(0x4000, deviceIndex+1, xAxis);
-    SetAxis(0x4000, deviceIndex+1, yAxis);
-}
-
-void pressTrigger(UINT deviceIndex, bool right, double val)
-{
-    UINT axis;
-    
-    if (right) {
-        axis = HID_USAGE_SL1;
-    } else {
-        axis = HID_USAGE_SL0;
-    }
-    
-    SetAxis(LONG(val*32767.0) + 1, deviceIndex+1, axis);
-    Sleep(kInteractionWaitTime);
-    SetAxis(16384, deviceIndex+1, axis);
-}
-
-void moveDPad(UINT deviceIndex, int direction)
-{    
-    SetContPov(direction * 4500, deviceIndex+1, 1);
-    Sleep(kInteractionWaitTime);
-    SetContPov(-1, deviceIndex+1, 1);
-}
+#define kInteractionWaitTime 100
 
 void Controller::initialize()
 {
@@ -444,4 +377,96 @@ void ControllerRemapper::run()
     deinitialize();
     
     qDebug() << "Remap thread finished";
+}
+
+// Note: the following four functions are only meant to be used from the controller window,
+// especially because they will block
+
+void ControllerRemapper::pressButton(UINT controller, UINT xboxButton)
+{
+    UINT vjoyDeviceId = xboxToVJoyMap[controller];
+    qDebug() << controller << vjoyDeviceId;
+    UCHAR button = 0;
+    
+    for(UCHAR i = 0; i < kButtonCount; ++i) {
+        if (buttonFlags[i] == xboxButton) {
+            button = i+1;
+            break;
+        }
+    }
+    
+    if (button == 0) {
+        qDebug() << "Error: tried to press invalid button";
+        return;
+    }
+    
+    SetBtn(true, vjoyDeviceId, button);
+    Sleep(kInteractionWaitTime);
+    SetBtn(false, vjoyDeviceId, button);
+}
+
+void ControllerRemapper::moveJoystick(UINT controller, bool right, double xVal, double yVal)
+{
+    UINT vjoyDeviceId = xboxToVJoyMap[controller];
+    UINT xAxis, yAxis;
+    
+    if (right) {
+        xAxis = HID_USAGE_RX;
+        yAxis = HID_USAGE_RY;
+    } else {
+        xAxis = HID_USAGE_X;
+        yAxis = HID_USAGE_Y;
+    }
+    
+    int steps = 20;
+    int moveTimeMS = 100;
+    
+    // We're gradually moving the joystick's position in order to simulate it actually
+    // being moved. This was necessary to get the controller window working with ePSXe.
+    for(int i = 0; i < steps; ++i) {
+        double u = double(i) / double(steps -1 );
+        SetAxis(LONG((xVal*u + 1.0)*16383.5) + 1, vjoyDeviceId, xAxis);
+        SetAxis(LONG((yVal*u + 1.0)*16383.5) + 1, vjoyDeviceId, yAxis);
+        Sleep(moveTimeMS/steps);
+    }
+    
+    SetAxis(LONG((xVal + 1.0)*16383.5) + 1, vjoyDeviceId, xAxis);
+    SetAxis(LONG((yVal + 1.0)*16383.5) + 1, vjoyDeviceId, yAxis);
+    
+    Sleep(kInteractionWaitTime);
+    
+    for(int i = 0; i < steps; ++i) {
+        double u = 1.0 - (double(i) / double(steps -1 ));
+        SetAxis(LONG((xVal*u + 1.0)*16383.5) + 1, vjoyDeviceId, xAxis);
+        SetAxis(LONG((yVal*u + 1.0)*16383.5) + 1, vjoyDeviceId, yAxis);
+        Sleep(moveTimeMS/steps);
+    }
+    
+    SetAxis(0x4000, vjoyDeviceId, xAxis);
+    SetAxis(0x4000, vjoyDeviceId, yAxis);
+}
+
+void ControllerRemapper::pressTrigger(UINT controller, bool right, double val)
+{
+    UINT vjoyDeviceId = xboxToVJoyMap[controller];
+    UINT axis;
+    
+    if (right) {
+        axis = HID_USAGE_SL1;
+    } else {
+        axis = HID_USAGE_SL0;
+    }
+    
+    SetAxis(LONG(val*32767.0) + 1, vjoyDeviceId, axis);
+    Sleep(kInteractionWaitTime);
+    SetAxis(16384, vjoyDeviceId, axis);
+}
+
+void ControllerRemapper::moveDPad(UINT controller, int direction)
+{    
+    UINT vjoyDeviceId = xboxToVJoyMap[controller];
+    
+    SetContPov(direction * 4500, vjoyDeviceId, 1);
+    Sleep(kInteractionWaitTime);
+    SetContPov(-1, vjoyDeviceId, 1);
 }

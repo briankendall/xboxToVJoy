@@ -2,6 +2,7 @@
 #define CONTROLLERWINDOW_H
 
 #include <QDialog>
+#include "controllerremapper.h"
 
 namespace Ui {
 class ControllerWindow;
@@ -12,13 +13,12 @@ class ControllerWindow : public QDialog
     Q_OBJECT
     
 public:
-    explicit ControllerWindow(QWidget *parent = 0);
+    explicit ControllerWindow(ControllerRemapper *ir, QWidget *parent = 0);
     ~ControllerWindow();
     
 private slots:
     void on_closeButton_clicked();
     void on_controllerComboBox_currentIndexChanged(int index);
-    
     
     void on_AButton_clicked();
     void on_BButton_clicked();
@@ -64,6 +64,7 @@ private slots:
 private:
     Ui::ControllerWindow *ui;
     int currentDeviceIndex;
+    ControllerRemapper *remapper;
 };
 
 #endif // CONTROLLERWINDOW_H
