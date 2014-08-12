@@ -19,17 +19,19 @@ contains(QMAKE_HOST.arch, x86_64) {
     LIBS += -L$$PWD/vJoySDK/lib
 }
 
-LIBS += -lvJoyInterface
+LIBS += -lvJoyInterface dinput8.lib dxguid.lib comctl32.lib
 
 SOURCES += main.cpp \
     qmainwidget.cpp \
     controllerremapper.cpp \
-    controllerwindow.cpp
+    controllerwindow.cpp \
+    dinputcorrelation.cpp
 
 HEADERS  += \
     qmainwidget.h \
     controllerremapper.h \
-    controllerwindow.h
+    controllerwindow.h \
+    dinputcorrelation.h
 
 RESOURCES += \
     resources.qrc

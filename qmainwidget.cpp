@@ -40,7 +40,7 @@ QMainWidget::QMainWidget(QWidget *parent) :
     
     controllerWindow = NULL;
     
-    controllerRemapper = new ControllerRemapper(this);
+    controllerRemapper = new ControllerRemapper((HWND)winId(), this);
     connect(controllerRemapper, SIGNAL(initializationError(QString)), this, SLOT(error(QString)));
     controllerRemapper->start();
 }

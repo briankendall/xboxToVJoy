@@ -4,6 +4,8 @@
 #include "controllerremapper.h"
 #include "public.h"
 #include "vjoyinterface.h"
+#include "dinputcorrelation.h"
+#include <comdef.h>
 
 typedef DWORD (WINAPI* XInputGetStateEx_t)(DWORD dwUserIndex, XINPUT_STATE *pState);
 XInputGetStateEx_t XInputGetStateEx = NULL;
@@ -252,8 +254,8 @@ void Controller::reset()
     SetAxis(xboxAxisToVJoy(0, true), deviceId, HID_USAGE_RY);
 }
 
-ControllerRemapper::ControllerRemapper(QObject *parent) :
-    QThread(parent)
+ControllerRemapper::ControllerRemapper(HWND win, QObject *parent) :
+    QThread(parent), dinputWindow(win)
 {
 }
 
@@ -361,6 +363,28 @@ void ControllerRemapper::initialize()
     
     if (controllerCount == 0) {
         throwInitError("There doesn't seem to be any vJoy controllers.");
+        return;
+    }
+    
+    HRESULT winResult;
+    int result;
+    doStuff(winResult, result, dinputWindow, controllerCount);
+    
+    if (FAILED(winResult)) {
+        _com_error err(winResult);
+        QString errorString = (LPSTR)err.ErrorMessage();
+        throwInitError(QString("vJoy controller correlation failed. Windows error: ") + errorString);
+        return;
+    }
+    
+    if (result == kErrorNotEnoughVJoyDevices) {
+        throwInitError("There were fewer vJoy devices as reported by DirectInput than the number of vJoy Devices "
+                       "as reported by vJoy itself.");
+        return;
+    }
+    
+    if (result == kErrorCouldntCorrelate) {
+        throwInitError("One or more vJoy Devices could not be correlated with their DirectInput counterpart.");
         return;
     }
     

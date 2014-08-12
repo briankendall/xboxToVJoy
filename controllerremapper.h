@@ -47,7 +47,7 @@ class ControllerRemapper : public QThread
 {
     Q_OBJECT
 public:
-    explicit ControllerRemapper(QObject *parent = 0);
+    explicit ControllerRemapper(HWND win, QObject *parent = 0);
     
 signals:
     
@@ -68,6 +68,7 @@ protected:
     Controller controllers[4];
     QTimer *pollTimer;
     unsigned int controllerCount;
+    HWND dinputWindow;
 };
 
 void pressButton(UINT deviceIndex, UINT xboxButton);
