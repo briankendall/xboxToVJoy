@@ -17,3 +17,9 @@ This application requires VJoy to be installed and up to four virtual controller
 When launched, it will run in the system tray. The system tray menu has an option for bringing up a window that allows each button on the virtual controller to be pressed using the mouse. This allows games (particularly emulators) to be configured to use the virtual controller, since they automatically detect button presses and will often detect an Xbox 360 controller's button pressed before the virtual controller.
 
 This program also properly correlates the vJoy devices as listed by DirectInput with each connected Xbox controller, so that the Xbox controller for player 1 maps to the first vJoy device, player 2 maps to the second vJoy device, and so on.
+
+Dependencies:
+Qt 5.x
+vJoy 2.0.x
+DirectX 8 SDK
+XInput
