@@ -2,6 +2,7 @@
 #define QMAINWIDGET_H
 
 #include <QWidget>
+#include <QCloseEvent>
 #include "controllerremapper.h"
 #include "controllerwindow.h"
 
@@ -10,11 +11,11 @@ class QMainWidget : public QWidget
     Q_OBJECT
 public:
     explicit QMainWidget(QWidget *parent = 0);
+    void deinitialize();
     
 signals:
     
 public slots:
-    void quit();
     void error(QString msg);
     void showControllerWindow();
     void controllerWindowDestroyed();
@@ -22,6 +23,7 @@ public slots:
 private:
     void createTrayIcon();
     void startControllerMapperThread();
+    void closeEvent(QCloseEvent *event);
     
     ControllerRemapper *controllerRemapper;
     ControllerWindow *controllerWindow;

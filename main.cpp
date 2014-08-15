@@ -9,8 +9,6 @@ int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
     QMainWidget *mainWidget;
-    //ControllerWindow w;
-    //w.show();
 
     if (!SetPriorityClass(GetCurrentProcess(), HIGH_PRIORITY_CLASS)) {
         qWarning() << "Warning: failed to set process priority. Error:" << GetLastError();
@@ -22,6 +20,10 @@ int main(int argc, char *argv[])
 
     int result = a.exec();
     
+    qDebug() << "Shutting down...";
+    mainWidget->deinitialize();
     delete mainWidget;
+    
+    qDebug() << "Done";
     return result;
 }
