@@ -49,6 +49,18 @@ bool directionPressed(const QVector<bool> &buttons, bool left, bool up, bool rig
 	return buttons[0] == left && buttons[1] == up && buttons[2] == right && buttons[3] == down;
 }
 
+void resetVJoyDevice(int deviceId)
+{
+    ResetVJD(deviceId);
+    SetContPov(-1, deviceId, 1);
+    SetAxis(xboxTriggerToVJoy(0), deviceId, HID_USAGE_SL0);
+    SetAxis(xboxTriggerToVJoy(0), deviceId, HID_USAGE_SL1);
+    SetAxis(xboxAxisToVJoy(0, false), deviceId, HID_USAGE_X);
+    SetAxis(xboxAxisToVJoy(0, true), deviceId, HID_USAGE_Y);
+    SetAxis(xboxAxisToVJoy(0, false), deviceId, HID_USAGE_RX);
+    SetAxis(xboxAxisToVJoy(0, true), deviceId, HID_USAGE_RY);
+}
+
 #define kInteractionWaitTime 100
 
 void Controller::initialize()
@@ -176,14 +188,7 @@ void Controller::reset()
     
     initialize();
     
-    ResetVJD(deviceId);
-    SetContPov(-1, deviceId, 1);
-    SetAxis(xboxTriggerToVJoy(0), deviceId, HID_USAGE_SL0);
-    SetAxis(xboxTriggerToVJoy(0), deviceId, HID_USAGE_SL1);
-    SetAxis(xboxAxisToVJoy(0, false), deviceId, HID_USAGE_X);
-    SetAxis(xboxAxisToVJoy(0, true), deviceId, HID_USAGE_Y);
-    SetAxis(xboxAxisToVJoy(0, false), deviceId, HID_USAGE_RX);
-    SetAxis(xboxAxisToVJoy(0, true), deviceId, HID_USAGE_RY);
+    resetVJoyDevice(deviceId);
 }
 
 ControllerRemapper::ControllerRemapper(HWND win, QObject *parent) :
@@ -342,7 +347,7 @@ void ControllerRemapper::deinitialize()
 {
     foreach(UINT deviceId, initializedDevices) {
         qDebug() << "Resetting and relinquishing device" << deviceId;
-        ResetVJD(deviceId);
+        resetVJoyDevice(deviceId);
         RelinquishVJD(deviceId);
     }
 }
