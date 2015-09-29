@@ -17,6 +17,20 @@ const int buttonFlags[kButtonCount] = {XINPUT_GAMEPAD_A, XINPUT_GAMEPAD_B, XINPU
 const int directionFlags[4] = {XINPUT_GAMEPAD_DPAD_LEFT, XINPUT_GAMEPAD_DPAD_UP, XINPUT_GAMEPAD_DPAD_RIGHT,
                                XINPUT_GAMEPAD_DPAD_DOWN};
 
+#define XBOX_REMAP_LT HID_USAGE_Z
+#define XBOX_REMAP_RT HID_USAGE_RZ
+#define XBOX_REMAP_LX HID_USAGE_X
+#define XBOX_REMAP_LY HID_USAGE_Y
+#define XBOX_REMAP_RX HID_USAGE_RX
+#define XBOX_REMAP_RY HID_USAGE_RY
+
+#define XBOX_REMAP_LT_NAME "Z"
+#define XBOX_REMAP_RT_NAME "RZ"
+#define XBOX_REMAP_LX_NAME "X"
+#define XBOX_REMAP_LY_NAME "Y"
+#define XBOX_REMAP_RX_NAME "RX"
+#define XBOX_REMAP_RY_NAME "RY"
+
 long clamp(long val, long min, long max)
 {
 	if (val < min) {
@@ -53,12 +67,12 @@ void resetVJoyDevice(int deviceId)
 {
     ResetVJD(deviceId);
     SetContPov(-1, deviceId, 1);
-    SetAxis(xboxTriggerToVJoy(0), deviceId, HID_USAGE_SL0);
-    SetAxis(xboxTriggerToVJoy(0), deviceId, HID_USAGE_SL1);
-    SetAxis(xboxAxisToVJoy(0, false), deviceId, HID_USAGE_X);
-    SetAxis(xboxAxisToVJoy(0, true), deviceId, HID_USAGE_Y);
-    SetAxis(xboxAxisToVJoy(0, false), deviceId, HID_USAGE_RX);
-    SetAxis(xboxAxisToVJoy(0, true), deviceId, HID_USAGE_RY);
+    SetAxis(xboxTriggerToVJoy(0), deviceId, XBOX_REMAP_LT);
+    SetAxis(xboxTriggerToVJoy(0), deviceId, XBOX_REMAP_RT);
+    SetAxis(xboxAxisToVJoy(0, false), deviceId, XBOX_REMAP_LX);
+    SetAxis(xboxAxisToVJoy(0, true), deviceId, XBOX_REMAP_LY);
+    SetAxis(xboxAxisToVJoy(0, false), deviceId, XBOX_REMAP_RX);
+    SetAxis(xboxAxisToVJoy(0, true), deviceId, XBOX_REMAP_RY);
 }
 
 #define kInteractionWaitTime 100
@@ -152,32 +166,32 @@ void Controller::doControllerMap(UINT vjoyDeviceId)
     }
 
     if (state.bLeftTrigger != lastLeftTrigger) {
-        SetAxis(xboxTriggerToVJoy(state.bLeftTrigger), vjoyDeviceId, HID_USAGE_SL0);
+        SetAxis(xboxTriggerToVJoy(state.bLeftTrigger), vjoyDeviceId, XBOX_REMAP_LT);
         lastLeftTrigger = state.bLeftTrigger;
     }
 
     if (state.bRightTrigger != lastRightTrigger) {
-        SetAxis(xboxTriggerToVJoy(state.bRightTrigger), vjoyDeviceId, HID_USAGE_SL1);
+        SetAxis(xboxTriggerToVJoy(state.bRightTrigger), vjoyDeviceId, XBOX_REMAP_RT);
         lastRightTrigger = state.bRightTrigger;
     }
 
     if (state.sThumbLX != lastLX) {
-        SetAxis(xboxAxisToVJoy(state.sThumbLX, false), vjoyDeviceId, HID_USAGE_X);
+        SetAxis(xboxAxisToVJoy(state.sThumbLX, false), vjoyDeviceId, XBOX_REMAP_LX);
         lastLX = state.sThumbLX;
     }
 
     if (state.sThumbLY != lastLY) {
-        SetAxis(xboxAxisToVJoy(state.sThumbLY, true), vjoyDeviceId, HID_USAGE_Y);
+        SetAxis(xboxAxisToVJoy(state.sThumbLY, true), vjoyDeviceId, XBOX_REMAP_LY);
         lastLY = state.sThumbLY;
     }
 
     if (state.sThumbRX != lastRX) {
-        SetAxis(xboxAxisToVJoy(state.sThumbRX, false), vjoyDeviceId, HID_USAGE_RX);
+        SetAxis(xboxAxisToVJoy(state.sThumbRX, false), vjoyDeviceId, XBOX_REMAP_RX);
         lastRX = state.sThumbRX;
     }
     
     if (state.sThumbRY != lastRY) {
-        SetAxis(xboxAxisToVJoy(state.sThumbRY, true), vjoyDeviceId, HID_USAGE_RY);
+        SetAxis(xboxAxisToVJoy(state.sThumbRY, true), vjoyDeviceId, XBOX_REMAP_RY);
         lastRY = state.sThumbRY;
     }
 }
@@ -242,22 +256,22 @@ void ControllerRemapper::initializeDevice(UINT deviceId)
             return;
     }
     
-    if (!checkAxisExists(deviceId, HID_USAGE_X, "X")) {
+    if (!checkAxisExists(deviceId, XBOX_REMAP_LX, XBOX_REMAP_LX_NAME)) {
         return;
     }
-    if (!checkAxisExists(deviceId, HID_USAGE_Y, "Y")) {
+    if (!checkAxisExists(deviceId, XBOX_REMAP_LY, XBOX_REMAP_LY_NAME)) {
         return;
     }
-    if (!checkAxisExists(deviceId, HID_USAGE_RX, "RX")) {
+    if (!checkAxisExists(deviceId, XBOX_REMAP_RX, XBOX_REMAP_RX_NAME)) {
         return;
     }
-    if (!checkAxisExists(deviceId, HID_USAGE_RY, "RY")) {
+    if (!checkAxisExists(deviceId, XBOX_REMAP_RY, XBOX_REMAP_RY_NAME)) {
         return;
     }
-    if (!checkAxisExists(deviceId, HID_USAGE_SL0, "U/Slider")) {
+    if (!checkAxisExists(deviceId, XBOX_REMAP_LT, XBOX_REMAP_LT_NAME)) {
         return;
     }
-    if (!checkAxisExists(deviceId, HID_USAGE_SL1, "V/Dial")) {
+    if (!checkAxisExists(deviceId, XBOX_REMAP_RT, XBOX_REMAP_RT_NAME)) {
         return;
     }
     
@@ -416,11 +430,11 @@ void ControllerRemapper::moveJoystick(UINT controller, bool right, double xVal, 
     UINT xAxis, yAxis;
     
     if (right) {
-        xAxis = HID_USAGE_RX;
-        yAxis = HID_USAGE_RY;
+        xAxis = XBOX_REMAP_RX;
+        yAxis = XBOX_REMAP_RY;
     } else {
-        xAxis = HID_USAGE_X;
-        yAxis = HID_USAGE_Y;
+        xAxis = XBOX_REMAP_LX;
+        yAxis = XBOX_REMAP_LY;
     }
     
     int steps = 20;
@@ -457,9 +471,9 @@ void ControllerRemapper::pressTrigger(UINT controller, bool right, double val)
     UINT axis;
     
     if (right) {
-        axis = HID_USAGE_SL1;
+        axis = XBOX_REMAP_RT;
     } else {
-        axis = HID_USAGE_SL0;
+        axis = XBOX_REMAP_LT;
     }
     
     SetAxis(LONG(val*32767.0) + 1, vjoyDeviceId, axis);
