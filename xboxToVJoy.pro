@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui
+QT       += core gui network
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -25,13 +25,24 @@ SOURCES += main.cpp \
     qmainwidget.cpp \
     controllerremapper.cpp \
     controllerwindow.cpp \
-    dinputcorrelation.cpp
+    dinputcorrelation.cpp \
+    QtSingleApplication/qtlocalpeer.cpp \
+    QtSingleApplication/qtlockedfile_unix.cpp \
+    QtSingleApplication/qtlockedfile.cpp \
+    QtSingleApplication/qtsingleapplication.cpp \
+    QtSingleApplication/qtsinglecoreapplication.cpp
 
 HEADERS  += \
     qmainwidget.h \
     controllerremapper.h \
     controllerwindow.h \
-    dinputcorrelation.h
+    dinputcorrelation.h \
+    QtSingleApplication/qtlocalpeer.h \
+    QtSingleApplication/QtLockedFile \
+    QtSingleApplication/qtlockedfile.h \
+    QtSingleApplication/QtSingleApplication \
+    QtSingleApplication/qtsingleapplication.h \
+    QtSingleApplication/qtsinglecoreapplication.h
 
 RESOURCES += \
     resources.qrc

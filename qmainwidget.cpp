@@ -5,42 +5,17 @@
 #include <QMessageBox>
 #include <QDebug>
 #include "qmainwidget.h"
-#include <tlhelp32.h>
+#include <tlhelp32.h>   
 
-int processesWithName(QString name)
-{
-    int count = 0;
-    PROCESSENTRY32 entry;
-    entry.dwSize = sizeof(PROCESSENTRY32);
-
-    HANDLE snapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, NULL);
-
-    if (Process32First(snapshot, &entry) == TRUE) {
-        while (Process32Next(snapshot, &entry) == TRUE) {
-            if (QString::fromWCharArray(entry.szExeFile) == name) {
-                count += 1;
-            }
-        }
-    }
-
-    return count;
-}    
-
-QMainWidget::QMainWidget(QWidget *parent) :
+QMainWidget::QMainWidget(bool remapEnabled, QWidget *parent) :
     QWidget(parent)
 {
-    // This is a poor way to check to see if the app is already running, but
-    // quite frankly I'm lazy:
-    if (processesWithName("xboxToVJoy.exe") > 1) {
-        error("There is already an instance of xboxToVJoy running.");
-        return;
-    }
-    
     createTrayIcon();
     
     controllerWindow = NULL;
     
-    controllerRemapper = new ControllerRemapper((HWND)winId(), this);
+    controllerRemapper = new ControllerRemapper((HWND)winId(), remapEnabled, NULL);
+    controllerRemapper->moveToThread(controllerRemapper);
     connect(controllerRemapper, SIGNAL(initializationError(QString)), this, SLOT(error(QString)));
     controllerRemapper->start();
 }
@@ -53,6 +28,7 @@ void QMainWidget::deinitialize()
     
     controllerRemapper->exit(0);
     controllerRemapper->wait(5000);
+    delete controllerRemapper;
 }
 
 void QMainWidget::createTrayIcon()
@@ -62,10 +38,15 @@ void QMainWidget::createTrayIcon()
     QAction *windowAction = new QAction("Controller Window", this);
     QAction *quitAction = new QAction("Shutdown xboxToVJoy", this);
     
+    enableAction = new QAction("Disable", this);
+    connect(enableAction, SIGNAL(triggered()), this, SLOT(toggleEnabled()));
+    
     connect(windowAction, SIGNAL(triggered()), this, SLOT(showControllerWindow()));
     connect(quitAction, SIGNAL(triggered()), qApp, SLOT(quit()));
     
     menu->addAction(windowAction);
+    menu->addSeparator();
+    menu->addAction(enableAction);
     menu->addSeparator();
     menu->addAction(quitAction);
     trayIcon->setContextMenu(menu);
@@ -107,4 +88,33 @@ void QMainWidget::closeEvent(QCloseEvent *event)
 {
     qApp->quit();
     event->ignore();
+}
+
+void QMainWidget::setRemappingEnabled(bool enabled)
+{
+    controllerRemapper->setEnabled(enabled);
+    
+    if (enabled) {
+        enableAction->setText("Disable");
+    } else {
+        enableAction->setText("Enable");
+    }
+}
+
+void QMainWidget::toggleEnabled()
+{
+    if (controllerRemapper->isEnabled()) {
+        setRemappingEnabled(false);
+    } else {
+        setRemappingEnabled(true);
+    }
+}
+
+void QMainWidget::appMessageReceived(const QString &message)
+{
+    if (message == "enable") {
+        setRemappingEnabled(true);
+    } else if (message == "disable") {
+        setRemappingEnabled(false);
+    }
 }

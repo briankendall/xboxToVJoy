@@ -6,6 +6,7 @@
 #include "vjoyinterface.h"
 #include "dinputcorrelation.h"
 #include <comdef.h>
+#include <QSignalMapper>
 
 typedef DWORD (WINAPI* XInputGetStateEx_t)(DWORD dwUserIndex, XINPUT_STATE *pState);
 XInputGetStateEx_t XInputGetStateEx = NULL;
@@ -127,7 +128,6 @@ void Controller::doControllerMap(UINT vjoyDeviceId)
 
         } else if (!playerButtonDown && buttonsDown[i]) {
             SetBtn(false, vjoyDeviceId, i+1);
-
         }
 
         buttonsDown[i] = playerButtonDown;
@@ -205,14 +205,15 @@ void Controller::reset()
     resetVJoyDevice(deviceId);
 }
 
-ControllerRemapper::ControllerRemapper(HWND win, QObject *parent) :
-    QThread(parent), dinputWindow(win)
+ControllerRemapper::ControllerRemapper(HWND win, bool inEnabled, QObject *parent) :
+    QThread(parent), dinputWindow(win), errorOccurred(false), enabled(inEnabled)
 {
 }
 
 void ControllerRemapper::throwInitError(QString msg)
 {
     emit initializationError(msg);
+    errorOccurred = true;
     exit(1);
 }
 
@@ -319,6 +320,11 @@ void ControllerRemapper::initialize()
     
     for(UINT index = 0; index < controllerCount; ++index) {
         initializeDevice(index+1);
+        
+        if (errorOccurred) {
+            return;
+        }
+        
         controllers[index].deviceIndex = index;
         controllers[index].initialize();
         controllers[index].reset();
@@ -375,8 +381,6 @@ void ControllerRemapper::poll()
 
 void ControllerRemapper::run()
 {
-    qDebug() << "Starting remap thread";
-    
     initialize();
     
     setPriority(QThread::HighestPriority);
@@ -385,7 +389,11 @@ void ControllerRemapper::run()
     pollTimer->moveToThread(this);
     connect(pollTimer, SIGNAL(timeout()), this, SLOT(poll()), Qt::DirectConnection);
     pollTimer->setTimerType(Qt::PreciseTimer);
-    pollTimer->start(1000 / kPollingCyclesPerSecond);
+    pollTimer->setInterval(1000 / kPollingCyclesPerSecond);
+    
+    if (enabled) {
+        pollTimer->start();
+    }
     
     exec();
     
@@ -488,4 +496,31 @@ void ControllerRemapper::moveDPad(UINT controller, int direction)
     SetContPov(direction * 4500, vjoyDeviceId, 1);
     Sleep(kInteractionWaitTime);
     SetContPov(-1, vjoyDeviceId, 1);
+}
+
+bool ControllerRemapper::isEnabled()
+{
+    return enabled;
+}
+
+void ControllerRemapper::setEnabled(bool inEnabled)
+{
+    if (QThread::currentThread() != this) {
+        QMetaObject::invokeMethod(this, "setEnabled", Qt::QueuedConnection, Q_ARG(bool, inEnabled));
+        return;
+    }
+    
+    if (!enabled && inEnabled) {
+        qDebug() << "Enabling remapping...";
+        pollTimer->start();
+    } else if (enabled && !inEnabled) {
+        qDebug() << "Disabling remapping...";
+        pollTimer->stop();
+        
+        foreach(UINT deviceId, initializedDevices) {
+            resetVJoyDevice(deviceId);
+        }
+    }
+    
+    enabled = inEnabled;
 }

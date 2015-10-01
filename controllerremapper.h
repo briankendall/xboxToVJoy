@@ -48,12 +48,13 @@ class ControllerRemapper : public QThread
 {
     Q_OBJECT
 public:
-    explicit ControllerRemapper(HWND win, QObject *parent = 0);
+    explicit ControllerRemapper(HWND win, bool inEnabled = true, QObject *parent = 0);
     
     void pressButton(UINT deviceIndex, UINT xboxButton);
     void moveJoystick(UINT deviceIndex, bool right, double xVal, double yVal);
     void pressTrigger(UINT deviceIndex, bool right, double val);
     void moveDPad(UINT deviceIndex, int direction);
+    bool isEnabled();
     
 signals:
     
@@ -61,6 +62,7 @@ signals:
     
 public slots:
     void poll();
+    void setEnabled(bool inEnabled);
     
 protected:
     virtual void run() Q_DECL_OVERRIDE;
@@ -76,6 +78,8 @@ protected:
     unsigned int controllerCount;
     HWND dinputWindow;
     QMap<UINT, UINT> xboxToVJoyMap;
+    bool errorOccurred;
+    bool enabled;
 };
 
 #endif // CONTROLLERREMAPPER_H
