@@ -389,7 +389,7 @@ void ControllerRemapper::run()
     pollTimer->moveToThread(this);
     connect(pollTimer, SIGNAL(timeout()), this, SLOT(poll()), Qt::DirectConnection);
     pollTimer->setTimerType(Qt::PreciseTimer);
-    pollTimer->setInterval(1000 / kPollingCyclesPerSecond);
+    pollTimer->setInterval(4);
     
     if (enabled) {
         pollTimer->start();
