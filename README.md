@@ -12,7 +12,7 @@ This has a number of important advantages over using the normal DirectInput inte
 5. Doesn't require installing alternative drivers for your Xbox 360 controller, which I was not able to get to work with a wireless Xbox 360 controller in Windows 8.
 6. The code here can be tweaked to alter the behavior of a controller.
 
-This application requires VJoy to be installed and up to four virtual controllers to be created that all have 11 buttons, one continuous POV hat switch, and the follow axes: X, Y, RX, RY, U/Slider, and V/Dial. The left and right triggers will be mapped to +U and +V axes respectively.
+This application requires VJoy to be installed and up to four virtual controllers to be created that all have 11 buttons, one continuous POV hat switch, and the follow axes: X, Y, Z, RX, RY, RZ. The left and right triggers will be mapped to +Z and +RZ axes respectively.
 
 When launched, it will run in the system tray. The system tray menu has an option for bringing up a window that allows each button on the virtual controller to be pressed using the mouse. This allows games (particularly emulators) to be configured to use the virtual controller, since they automatically detect button presses and will often detect an Xbox 360 controller's button pressed before the virtual controller.
 
