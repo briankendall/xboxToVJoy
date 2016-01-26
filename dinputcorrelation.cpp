@@ -37,6 +37,7 @@ QList<LPDIRECTINPUTDEVICE8> vjoyControllers;
 
 void determineCorrelation(HRESULT &winResult, int &result, QMap<UINT, UINT> &correlationMap, HWND dinputWindow, int vjoyControllerCount)
 {
+    QElapsedTimer timer;
     HRESULT enumerationResult = ERROR_SUCCESS;
     winResult = ERROR_SUCCESS;
     result = kNoError;
@@ -92,8 +93,7 @@ void determineCorrelation(HRESULT &winResult, int &result, QMap<UINT, UINT> &cor
     for(int i = 0; i < vjoyControllerCount; ++i) {
         SetBtn(true, i+1, i+1);
     }
-    
-    QElapsedTimer timer;
+
     timer.start();
     while(correlationMap.count() < vjoyControllerCount && timer.elapsed() < 2000) {
         Sleep(20);
