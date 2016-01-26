@@ -18,4 +18,6 @@ When launched, it will run in the system tray. The system tray menu has an optio
 
 This program also properly correlates the vJoy devices as listed by DirectInput with each connected Xbox controller, so that the Xbox controller for player 1 maps to the first vJoy device, player 2 maps to the second vJoy device, and so on.
 
-Dependencies: Qt 5.x, vJoy 2.0.x, DirectX 8 SDK, XInput
+Dependencies: Qt 5.x, vJoy 2.1.6 SDK, DirectX 8 SDK, XInput
+
+Requirements: vJoy 2.1.6, XInput
