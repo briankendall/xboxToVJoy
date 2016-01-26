@@ -469,7 +469,6 @@ void ControllerRemapper::run()
 void ControllerRemapper::pressButton(UINT controller, UINT xboxButton)
 {
     UINT vjoyDeviceId = xboxToVJoyMap[controller];
-    qDebug() << controller << vjoyDeviceId;
     UCHAR button = 0;
     
     for(UCHAR i = 0; i < kButtonCount; ++i) {
