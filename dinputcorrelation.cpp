@@ -25,6 +25,7 @@
 #include <QList>
 #include <QElapsedTimer>
 #include "dinputcorrelation.h"
+#include "public.h"
 #include "vjoyinterface.h"
 #include "controllerremapper.h"
 #include "qmainwidget.h"
