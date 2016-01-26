@@ -228,8 +228,30 @@ bool ControllerRemapper::checkAxisExists(UINT deviceId, UINT axis, QString axisN
     }
 }
 
+bool ControllerRemapper::initializeVJoy()
+{
+    if (!vJoyEnabled()) {
+        throwInitError("Failed Getting vJoy attributes. vJoy is not enabled.");
+        return false;
+    }
+
+    // Test interface DLL matches vJoy driver
+    // Compare versions
+    WORD VerDll, VerDrv;
+
+    if (!DriverMatch(&VerDll, &VerDrv)) {
+        throwInitError(QString("vJoy Driver (version %1) does not match vJoyInterface DLL (version %2)")
+                       .arg(uint(VerDrv), 4, 16, QChar('0')).arg(uint(VerDll), 4, 16, QChar('0')));
+        return false;
+    }
+}
+
 void ControllerRemapper::initializeDevice(UINT deviceId)
 {
+    if (!initializeVJoy()) {
+        return;
+    }
+
     // Get the driver attributes (Vendor ID, Product ID, Version Number)
     if (!vJoyEnabled())
     {

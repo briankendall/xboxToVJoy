@@ -71,6 +71,7 @@ protected:
     void throwInitError(QString arg);
     bool checkAxisExists(UINT deviceId, UINT axis, QString axisName);
     HINSTANCE getXInputDLLHandle();
+    bool initializeVJoy();
     
     QSet<UINT> initializedDevices;
     Controller controllers[4];
