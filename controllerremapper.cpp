@@ -302,6 +302,35 @@ void ControllerRemapper::initializeDevice(UINT deviceId)
     initializedDevices.insert(deviceId);
 }
 
+HINSTANCE ControllerRemapper::getXInputDLLHandle()
+{
+    HINSTANCE result = LoadLibrary(XINPUT_DLL);
+
+    if (result) {
+        return result;
+    }
+
+    result = LoadLibrary(L"xinput1_4.dll");
+
+    if (result) {
+        return result;
+    }
+
+    result = LoadLibrary(L"xinput9_1_0.dll");
+
+    if (result) {
+        return result;
+    }
+
+    result = LoadLibrary(L"xinput1_3");
+
+    if (result) {
+        return result;
+    }
+
+    return NULL;
+}
+
 void ControllerRemapper::initialize()
 {
     controllerCount = 0;
@@ -332,7 +361,13 @@ void ControllerRemapper::initialize()
     
     // Get access to XInputGetStateEx so we can query the state of the Guide/Home button:
     if(!XInputGetStateEx) {
-        HINSTANCE hXInput = LoadLibrary(XINPUT_DLL);
+        HINSTANCE hXInput = getXInputDLLHandle();
+
+        if (!hXInput) {
+            throwInitError("Could not get a handle to the XInput DLL.");
+            return;
+        }
+
         XInputGetStateEx = (XInputGetStateEx_t) GetProcAddress(hXInput, (LPCSTR) 100);
         
         if(!XInputGetStateEx) { // Might help with wrappers compatibility

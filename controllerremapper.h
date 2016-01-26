@@ -70,6 +70,7 @@ protected:
     void initializeDevice(UINT deviceId);
     void throwInitError(QString arg);
     bool checkAxisExists(UINT deviceId, UINT axis, QString axisName);
+    HINSTANCE getXInputDLLHandle();
     
     QSet<UINT> initializedDevices;
     Controller controllers[4];
