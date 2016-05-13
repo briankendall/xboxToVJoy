@@ -74,6 +74,10 @@ void resetVJoyDevice(int deviceId)
     SetAxis(xboxAxisToVJoy(0, true), deviceId, XBOX_REMAP_LY);
     SetAxis(xboxAxisToVJoy(0, false), deviceId, XBOX_REMAP_RX);
     SetAxis(xboxAxisToVJoy(0, true), deviceId, XBOX_REMAP_RY);
+    
+    for (int i = 0; i < kButtonCount; ++i) {
+        SetBtn(false, deviceId, i+1);
+    }
 }
 
 #define kInteractionWaitTime 100
@@ -102,7 +106,8 @@ void Controller::doControllerMap(UINT vjoyDeviceId)
 
     if (!connected) {
         if (lastConnected) {
-            reset();
+            qDebug() << "reseting device:" << vjoyDeviceId;
+            reset(vjoyDeviceId);
         }
         lastConnected = false;
         
@@ -196,13 +201,10 @@ void Controller::doControllerMap(UINT vjoyDeviceId)
     }
 }
 
-void Controller::reset()
+void Controller::reset(UINT vjoyDeviceId)
 {
-    UINT deviceId = deviceIndex + 1;
-    
     initialize();
-    
-    resetVJoyDevice(deviceId);
+    resetVJoyDevice(vjoyDeviceId);
 }
 
 ControllerRemapper::ControllerRemapper(HWND win, bool inEnabled, QObject *parent) :
@@ -244,6 +246,8 @@ bool ControllerRemapper::initializeVJoy()
                        .arg(uint(VerDrv), 4, 16, QChar('0')).arg(uint(VerDll), 4, 16, QChar('0')));
         return false;
     }
+    
+    return true;
 }
 
 void ControllerRemapper::initializeDevice(UINT deviceId)
@@ -378,7 +382,6 @@ void ControllerRemapper::initialize()
         
         controllers[index].deviceIndex = index;
         controllers[index].initialize();
-        controllers[index].reset();
     }
     
     // Get access to XInputGetStateEx so we can query the state of the Guide/Home button:
@@ -417,6 +420,10 @@ void ControllerRemapper::initialize()
     if (result == kErrorCouldntCorrelate) {
         throwInitError("One or more vJoy Devices could not be correlated with their DirectInput counterpart.");
         return;
+    }
+    
+    for(UINT index = 0; index < controllerCount; ++index) {
+        controllers[index].reset(xboxToVJoyMap[index]);
     }
 }
 

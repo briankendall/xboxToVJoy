@@ -31,7 +31,7 @@ public:
     Controller() {};
     void initialize();
     void doControllerMap(UINT vjoyDeviceId);
-    void reset();
+    void reset(UINT vjoyDeviceId);
     
     UINT deviceIndex;
 private:
