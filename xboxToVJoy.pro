@@ -19,7 +19,7 @@ contains(QMAKE_HOST.arch, x86_64) {
     LIBS += -L$$PWD/vJoySDK/lib
 }
 
-LIBS += -lvJoyInterface dinput8.lib dxguid.lib comctl32.lib
+LIBS += -lvJoyInterface dinput8.lib dxguid.lib comctl32.lib Xinput.lib
 
 SOURCES += main.cpp \
     qmainwidget.cpp \

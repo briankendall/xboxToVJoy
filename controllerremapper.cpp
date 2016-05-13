@@ -576,9 +576,11 @@ void ControllerRemapper::setEnabled(bool inEnabled)
     if (!enabled && inEnabled) {
         qDebug() << "Enabling remapping...";
         pollTimer->start();
+        XInputEnable(true);
     } else if (enabled && !inEnabled) {
         qDebug() << "Disabling remapping...";
         pollTimer->stop();
+        XInputEnable(false);
         
         foreach(UINT deviceId, initializedDevices) {
             resetVJoyDevice(deviceId);
