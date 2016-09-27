@@ -1,3 +1,4 @@
+#define NOMINMAX
 #include <windows.h>
 #include <XInput.h>
 #include <QDebug>
@@ -7,6 +8,8 @@
 #include "dinputcorrelation.h"
 #include <comdef.h>
 #include <QSignalMapper>
+#include <QDateTime>
+#include <QSettings>
 
 typedef DWORD (WINAPI* XInputGetStateEx_t)(DWORD dwUserIndex, XINPUT_STATE *pState);
 XInputGetStateEx_t XInputGetStateEx = NULL;
@@ -400,26 +403,55 @@ void ControllerRemapper::initialize()
         }
     }
     
-    HRESULT winResult;
-    int result;
-    determineCorrelation(winResult, result, xboxToVJoyMap, dinputWindow, controllerCount);
+    // In order to allow xboxToVJoy to be safely closed and reopened however many times the user likes
+    // (as pressing buttons on the controller can have unintended consequences)
+    // we will determine the dinput / vJoy correlation only when the app is launched the first time
+    // after the computer reboots. And we will keep track of when we need to determine the correlation
+    // by saving it and the date of when the computer last rebooted.
+    QSettings settings("xboxToVJoy");
+    QDateTime bootTime = QDateTime::currentDateTime().addMSecs(0LL - (LONGLONG)GetTickCount64());
+    QDateTime storedBootTime = settings.value("lastBoot").toDateTime();
+    QVariantMap storedXboxToVJoyMap = settings.value("xboxToVJoyMap").toMap();
     
-    if (FAILED(winResult)) {
-        _com_error err(winResult);
-        QString errorString = (LPSTR)err.ErrorMessage();
-        throwInitError(QString("vJoy controller correlation failed. Windows error: ") + errorString);
-        return;
-    }
-    
-    if (result == kErrorNotEnoughVJoyDevices) {
-        throwInitError("There were fewer vJoy devices as reported by DirectInput than the number of vJoy Devices "
-                       "as reported by vJoy itself.");
-        return;
-    }
-    
-    if (result == kErrorCouldntCorrelate) {
-        throwInitError("One or more vJoy Devices could not be correlated with their DirectInput counterpart.");
-        return;
+    if (storedBootTime.isValid() && storedXboxToVJoyMap.count() == 4 && abs(bootTime.msecsTo(storedBootTime)) < 5000) {
+        qDebug() << "Using last correlation results as the computer has not rebooted since then";
+        
+        foreach(const QString &key, storedXboxToVJoyMap.keys()) {
+            xboxToVJoyMap[key.toUInt()] = storedXboxToVJoyMap[key].toUInt();
+        }
+    } else {
+        qDebug() << "Determining correlation...";
+        HRESULT winResult;
+        int result;
+        determineCorrelation(winResult, result, xboxToVJoyMap, dinputWindow, controllerCount);
+        
+        if (FAILED(winResult)) {
+            _com_error err(winResult);
+            QString errorString = (LPSTR)err.ErrorMessage();
+            throwInitError(QString("vJoy controller correlation failed. Windows error: ") + errorString);
+            return;
+        }
+        
+        if (result == kErrorNotEnoughVJoyDevices) {
+            throwInitError("There were fewer vJoy devices as reported by DirectInput than the number of vJoy Devices "
+                           "as reported by vJoy itself.");
+            return;
+        }
+        
+        if (result == kErrorCouldntCorrelate) {
+            throwInitError("One or more vJoy Devices could not be correlated with their DirectInput counterpart.");
+            return;
+        }
+        
+        QVariantMap xboxToVJoyMapWritable;
+        
+        foreach(UINT key, xboxToVJoyMap.keys()) {
+            xboxToVJoyMapWritable[QString::number(key)] = xboxToVJoyMap[key];
+        }
+        
+        settings.setValue("lastBoot", QVariant(bootTime));
+        settings.setValue("xboxToVJoyMap", QVariant(xboxToVJoyMapWritable));
+        settings.sync();
     }
     
     for(UINT index = 0; index < controllerCount; ++index) {
