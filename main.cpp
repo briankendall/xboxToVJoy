@@ -13,6 +13,8 @@ QString getArgCommand(int argc, char *argv[])
             return "enable";
         } else if (strcmp(argv[i], "--disable") == 0 || strcmp(argv[i], "-d") == 0) {
             return "disable";
+        } else if (strcmp(argv[i], "--quit") == 0 || strcmp(argv[i], "-q") == 0) {
+            return "quit";
         }
     }
     return "";
@@ -31,7 +33,9 @@ int main(int argc, char *argv[])
             qDebug() << "Already running";
         }
         return 0;
-	}
+	} else if (command == "quit") {
+        return 0;
+    }
     
     QMainWidget *mainWidget;
     

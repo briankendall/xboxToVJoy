@@ -116,5 +116,7 @@ void QMainWidget::appMessageReceived(const QString &message)
         setRemappingEnabled(true);
     } else if (message == "disable") {
         setRemappingEnabled(false);
+    } else if (message == "quit") {
+        qApp->quit();
     }
 }
