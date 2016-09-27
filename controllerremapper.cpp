@@ -243,7 +243,7 @@ bool ControllerRemapper::initializeVJoy()
     // Test interface DLL matches vJoy driver
     // Compare versions
     WORD VerDll, VerDrv;
-
+    
     if (!DriverMatch(&VerDll, &VerDrv)) {
         throwInitError(QString("vJoy Driver (version %1) does not match vJoyInterface DLL (version %2)")
                        .arg(uint(VerDrv), 4, 16, QChar('0')).arg(uint(VerDll), 4, 16, QChar('0')));
@@ -255,17 +255,6 @@ bool ControllerRemapper::initializeVJoy()
 
 void ControllerRemapper::initializeDevice(UINT deviceId)
 {
-    if (!initializeVJoy()) {
-        return;
-    }
-
-    // Get the driver attributes (Vendor ID, Product ID, Version Number)
-    if (!vJoyEnabled())
-    {
-        throwInitError("vJoy driver not enabled: Failed Getting vJoy attributes.");
-        return;
-    }
-
     // Get the state of the requested device
     VjdStat status = GetVJDStatus(deviceId);
     switch (status) {
@@ -305,7 +294,7 @@ void ControllerRemapper::initializeDevice(UINT deviceId)
         return;
     }
     
-	// Get the number of buttons and POV Hat switchessupported by this vJoy device
+	// Get the number of buttons and POV Hat switches supported by this vJoy device
     
     if (GetVJDButtonNumber(deviceId) < kButtonCount) {
         throwInitError(QString("vJoy Device %1 does not have at least %2 buttons.\nPlease make sure "
@@ -362,6 +351,10 @@ HINSTANCE ControllerRemapper::getXInputDLLHandle()
 
 void ControllerRemapper::initialize()
 {
+    if (!initializeVJoy()) {
+        return;
+    }
+    
     controllerCount = 0;
     for(UINT index = 0; index < 4; ++index) {
         if (GetVJDStatus(index+1) == VJD_STAT_MISS) {
