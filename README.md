@@ -18,6 +18,8 @@ When launched, it will run in the system tray. The system tray menu has an optio
 
 This program also properly correlates the vJoy devices as listed by DirectInput with each connected Xbox controller, so that the Xbox controller for player 1 maps to the first vJoy device, player 2 maps to the second vJoy device, and so on.
 
+**Useful tip**: combine xboxToVJoy with [devreorder](https://github.com/briankendall/devreorder) so that all of your old DirectInput games only see the vJoy devices. This way their controller bindings will always work regardless of how Windows arbitrarily changes the order of your controllers! It's the best way I know of to have your Xinput controllers "just work" with DirectInput games!!
+
 Dependencies: Qt 5.x, vJoy 2.1.6 SDK, DirectX 8 SDK, XInput
 
 Requirements: vJoy 2.1.6, XInput
