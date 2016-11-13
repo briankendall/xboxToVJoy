@@ -124,10 +124,16 @@ void Controller::doControllerMap(UINT vjoyDeviceId)
         return;
     }
     
-    const XINPUT_GAMEPAD &state = controllerState.Gamepad;
+    XINPUT_GAMEPAD state = controllerState.Gamepad;
     handledFirstPacket = true;
     lastPacketNumber = controllerState.dwPacketNumber;
 
+    if (state.wButtons & XINPUT_GAMEPAD_GUIDE) {
+        state.wButtons = 0;
+        state.bLeftTrigger = 0;
+        state.bRightTrigger = 0;
+    }
+    
     for (int i = 0; i < kButtonCount; ++i) {
         bool playerButtonDown = (state.wButtons & buttonFlags[i]) != 0;
 
